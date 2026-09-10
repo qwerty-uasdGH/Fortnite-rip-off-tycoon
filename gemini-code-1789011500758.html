@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>2D Fortnite Loot Tycoon</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #121212;
+      color: #ffffff;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .header {
+      background: #1e1e2e;
+      padding: 15px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-bottom: 20px;
+      border: 2px solid #333;
+    }
+
+    .money { color: #2ecc71; font-size: 1.8rem; font-weight: bold; }
+    .cps { color: #f1c40f; font-size: 1.1rem; }
+
+    .supply-box {
+      background: #2c1d11;
+      border: 2px solid #e67e22;
+      border-radius: 12px;
+      padding: 15px;
+      max-width: 650px;
+      margin: 0 auto 20px auto;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 10px auto;
+    }
+
+    #wheelCanvas {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+    }
+
+    .medallion-pouch {
+      background: #1a1a2e;
+      border: 2px solid #f39c12;
+      border-radius: 12px;
+      padding: 15px;
+      max-width: 650px;
+      margin: 0 auto 20px auto;
+    }
+
+    .medallion-grid {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .medallion-slot {
+      background: #252538;
+      border: 2px solid #f39c12;
+      border-radius: 10px;
+      width: 140px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .medallion-img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 5px;
+    }
+
+    .platform-box {
+      background: #1e1e2e;
+      border: 3px dashed #e94560;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 650px;
+      margin: 0 auto 25px auto;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .range-box {
+      background: #181824;
+      border: 2px solid #3498db;
+      border-radius: 12px;
+      padding: 15px;
+      max-width: 650px;
+      margin: 0 auto 25px auto;
+    }
+
+    .target-area {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #101018;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 10px;
+      border: 1px solid #333;
+      cursor: crosshair;
+    }
+
+    .target {
+      position: absolute;
+      width: 45px;
+      height: 45px;
+      background: radial-gradient(circle, #ff0000 40%, #ffffff 45%, #ff0000 50%);
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      cursor: crosshair;
+      user-select: none;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .target-fake {
+      position: absolute;
+      width: 45px;
+      height: 45px;
+      background: radial-gradient(circle, #ff4500 40%, #ffffff 45%, #ff4500 50%);
+      border: 3px solid #ff8c00;
+      border-radius: 50%;
+      cursor: crosshair;
+      user-select: none;
+      box-shadow: 0 0 10px rgba(255, 69, 0, 0.8);
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .target:hover, .target-fake:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .inventory-box {
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .slot {
+      background: #252538;
+      border: 2px solid #444;
+      border-radius: 8px;
+      height: 125px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 5px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .drop-anim {
+      animation: dropDown 0.5s ease-out forwards;
+    }
+
+    @keyframes dropDown {
+      0% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .Common { border-color: #a3a3a3; background: #2a2a2a; }
+    .Uncommon { border-color: #2ecc71; background: #153322; }
+    .Rare { border-color: #3498db; background: #132a42; }
+    .Epic { border-color: #9b59b6; background: #2c163e; }
+    .Legendary { border-color: #f39c12; background: #422b13; }
+    .Mythic { border-color: #f1c40f; background: #4a3b00; }
+    .Exotic { border-color: #00ffff; background: #0d3b42; }
+    .MedallionBorder { border-color: #f39c12; background: #332200; }
+
+    .text-Common { color: #a3a3a3; }
+    .text-Uncommon { color: #2ecc71; }
+    .text-Rare { color: #3498db; }
+    .text-Epic { color: #9b59b6; }
+    .text-Legendary { color: #f39c12; }
+    .text-Mythic { color: #f1c40f; }
+    .text-Exotic { color: #00ffff; }
+
+    .rarity-label {
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin: 1px 0;
+    }
+
+    .ability-text {
+      font-size: 0.65rem;
+      color: #00ffff;
+      font-weight: bold;
+    }
+
+    button {
+      background: #2ecc71;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    button:disabled { background: #555; cursor: not-allowed; }
+    button:hover:not(:disabled) { opacity: 0.9; }
+    .sell-btn { background: #e74c3c; font-size: 0.75rem; }
+    
+    select {
+      background: #252538;
+      color: white;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #555;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔫 Fortnite Loot Tycoon 🔫</h1>
+
+  <div class="header">
+    <div class="money">$<span id="cash">50</span></div>
+    <div class="cps">+$<span id="income">1</span> / sec <span id="2x-indicator" style="color:#00ffff; display:none;">(⚡ 2X Active!)</span></div>
+    <div style="font-size: 0.9rem; color: #ff00ff; margin-top: 5px;">
+      ✨ Active Luck Boost: +<b id="luck-boost">0</b>% <span id="cheat-luck-indicator" style="color:#00ffff; display:none;">(DEV +70%)</span>
+    </div>
+  </div>
+
+  <!-- SUPPLY DROP SECTION -->
+  <div class="supply-box">
+    <h3>🪂 Supply Drop</h3>
+    <p id="supply-status">Next Supply Drop arriving in: <b id="supply-timer">60</b>s</p>
+    
+    <div id="wheel-area" style="display: none;">
+      <p style="margin: 5px; font-size: 0.9rem;">Hit the <b>RED ZONE</b>! Round <b id="wheel-round">1</b>/3</p>
+      <div class="wheel-container">
+        <canvas id="wheelCanvas" width="150" height="150"></canvas>
+      </div>
+      <button id="claim-drop-btn" style="background:#e67e22; font-size:1.1rem; padding:8px 16px;" onclick="clickWheel()">STOP ARROW!</button>
+    </div>
+  </div>
+
+  <!-- MEDALLION POUCH -->
+  <div class="medallion-pouch">
+    <h3>🏅 Medallion Pouch (<span id="med-count">0</span>/3)</h3>
+    <div class="medallion-grid" id="medallion-grid"></div>
+  </div>
+
+  <!-- LOOT PLATFORM -->
+  <div class="platform-box">
+    <h3>Loot Platform</h3>
+    <p>Next Drop in: <b id="timer">12</b>s | Claimed: <b id="claimed-count">0</b>/2</p>
+    <div class="platform-grid" id="platform-grid"></div>
+  </div>
+
+  <!-- SHOOTING RANGE -->
+  <div class="range-box">
+    <h3>🎯 Target Practice Challenge</h3>
+    <p style="font-size: 0.85rem; color: #ccc;">
+      Cost: <b>$1,000</b> | Hit <b id="target-goal-text">8</b>/10 REAL targets! Avoid reddish-orange fakes & misses! (2s per target)
+    </p>
+
+    <div>
+      <label for="weapon-select">Choose Weapon: </label>
+      <select id="weapon-select"></select>
+    </div>
+
+    <button id="start-range-btn" onclick="startShootingRange()">Play Challenge ($1,000)</button>
+
+    <div style="margin-top: 10px;">
+      Target: <b id="target-count">0</b>/10 | Hits: <b id="hits-count">0</b> | Jackpot: <b id="jackpot-amount" style="color: #2ecc71;">$1,500</b>
+    </div>
+
+    <div class="target-area" id="target-area" onclick="areaClicked(event)"></div>
+  </div>
+
+  <!-- SAVE / LOAD SYSTEM -->
+  <div class="supply-box" style="background: #1a2a3a; border-color: #3498db; max-width: 710px; margin: 0 auto 25px auto;">
+    <h3>💾 Save / Load Game</h3>
+    <input type="text" id="save-code-input" placeholder="Your save code will appear here..." style="width: 70%; padding: 6px; background: #111; color: #fff; border: 1px solid #555; border-radius: 4px;">
+    <br><br>
+    <button onclick="generateSaveCode()" style="background: #3498db;">Create Save Code</button>
+    <button onclick="loadGameCode()" style="background: #2ecc71;">Load Game Code</button>
+  </div>
+
+  <!-- INVENTORY (MAX 8) -->
+  <div class="inventory-box">
+    <h3>Your Inventory (<span id="count">1</span>/8)</h3>
+    <div class="grid" id="inventory-grid"></div>
+  </div>
+
+  <script>
+    let cash = 50;
+    let spawnTimer = 12;
+    let exoticTimer = 30;
+    let platformItems = [null, null, null];
+    let itemsCollectedThisDrop = 0;
+    let isNewDrop = true;
+    let luckBoost = 0;
+    let surgeLuckTemp = 0;
+
+    let doubleCashTimer = 0;
+    let medallions = [];
+
+    // DEV CHEAT VARIABLES
+    let devCheatCooldown = 0; 
+    let devLuckTimer = 0;     
+    let oxrCheatUsed = false; // Tracks if the Ctrl+O cheat was already used
+
+    // SUPPLY DROP SYSTEM
+    let supplyDropTimer = 60;
+    let supplyDropAvailable = false;
+    let wheelAngle = 0;
+    let wheelSpeed = 0.08;
+    let wheelRounds = 0;
+    let wheelAnimId = null;
+    let redZoneStart = Math.PI * 1.2;
+    let redZoneEnd = Math.PI * 1.7;
+
+    // SHOOTING RANGE VARIABLES
+    let rangeActive = false;
+    let rangeCooldown = 0;
+    let targetIndex = 0;
+    let hits = 0;
+    let gamesPlayed = 0;
+    let currentJackpot = 1500;
+    let targetTimer = null;
+    let selectedWeaponIndex = 0;
+
+    const medallionDefs = [
+      {
+        id: "surge",
+        name: "Surge Medallion",
+        color: "#3498db",
+        icon: "image_eb9fce.png",
+        desc: "+2% Luck on next drop when buying something.",
+        cost: 200
+      },
+      {
+        id: "springleg",
+        name: "Springleg Medallion",
+        color: "#1abc9c",
+        icon: "image_eb9b8b.png",
+        desc: "15% chance to trigger 2X cash for 30s.",
+        cost: 200
+      },
+      {
+        id: "carapace",
+        name: "Carapace Medallion",
+        color: "#e91e63",
+        icon: "image_eb9fed.png",
+        desc: "Need 7 target hits for Jackpot (instead of 8).",
+        cost: 200
+      }
+    ];
+
+    const weaponTypes = [
+      { name: "Pistol", costMult: 1.0, incomeMult: 0.9, spread: 0 },
+      { name: "Submachine Gun", costMult: 0.9, incomeMult: 1.3, spread: 30 },
+      { name: "Assault Rifle", costMult: 1.5, incomeMult: 2.2, spread: 20 },
+      { name: "Pump Shotgun", costMult: 2.2, incomeMult: 2.2, spread: 35 },
+      { name: "Heavy Sniper", costMult: 2.0, incomeMult: 3.5, spread: 0 },
+      { name: "O.X.R. Rifle", costMult: 2.5, incomeMult: 3.8, spread: 15 }
+    ];
+
+    const rarities = [
+      { tier: "Common", income: 1, cost: 20, chance: 45 },
+      { tier: "Uncommon", income: 3, cost: 60, chance: 30 },
+      { tier: "Rare", income: 10, cost: 200, chance: 14 },
+      { tier: "Epic", income: 40, cost: 800, chance: 7 },
+      { tier: "Legendary", income: 150, cost: 3000, chance: 3 },
+      { tier: "Mythic", income: 300, cost: 6000, chance: 0.8 },
+      { tier: "Exotic", income: 500, cost: 10000, chance: 0.2, isExotic: true }
+    ];
+
+    let inventory = [
+      { name: "Pistol", tier: "Common", income: 1, cost: 20 }
+    ];
+
+    // SAVE / LOAD CODE FUNCTIONS
+    function generateSaveCode() {
+      let saveData = {
+        c: cash,
+        lb: luckBoost,
+        inv: inventory,
+        med: medallions,
+        gp: gamesPlayed,
+        oxrUsed: oxrCheatUsed
+      };
+      
+      let jsonString = JSON.stringify(saveData);
+      let encodedCode = btoa(jsonString);
+      
+      let inputField = document.getElementById("save-code-input");
+      inputField.value = encodedCode;
+      inputField.select();
+      alert("Save code created! Copy it and keep it safe.");
+    }
+
+    function loadGameCode() {
+      let code = document.getElementById("save-code-input").value.trim();
+      if (!code) {
+        alert("Please paste a save code first!");
+        return;
+      }
+      
+      try {
+        let jsonString = atob(code);
+        let saveData = JSON.parse(jsonString);
+        
+        cash = saveData.c || 50;
+        luckBoost = saveData.lb || 0;
+        inventory = saveData.inv || [];
+        medallions = saveData.med || [];
+        gamesPlayed = saveData.gp || 0;
+        oxrCheatUsed = saveData.oxrUsed || false;
+        
+        renderUI();
+        alert("Game loaded successfully!");
+      } catch (e) {
+        alert("Invalid save code! Make sure you copied the whole thing.");
+      }
+    }
+
+    // --- DEV CHEAT LISTENER ---
+    let pressedKeys = new Set();
+    window.addEventListener('keydown', (e) => {
+      pressedKeys.add(e.key.toLowerCase());
+      if (e.ctrlKey && e.altKey && pressedKeys.has('f') && pressedKeys.has('4')) {
+        triggerDevCheat();
+      }
+      
+      // One-time Ctrl + O cheat for Exotic O.X.R. Rifle
+      if (e.ctrlKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        if (oxrCheatUsed) {
+          alert("This cheat code has already been used!");
+          return;
+        }
+        if (inventory.length < 8) {
+          oxrCheatUsed = true;
+          inventory.push({
+            name: "Eradicator O.X.R. Rifle",
+            tier: "Exotic",
+            income: 500,
+            cost: 10000,
+            ability: true
+          });
+          renderUI();
+        } else {
+          alert("Inventory is full!");
+        }
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      pressedKeys.delete(e.key.toLowerCase());
+    });
+
+    function triggerDevCheat() {
+      if (devCheatCooldown > 0) return; 
+
+      cash += 10000;
+      supplyDropAvailable = true;
+      supplyDropTimer = 0;
+      spawnTimer = 0;
+      spawnNewPlatformItems();
+
+      devLuckTimer = 120; 
+      devCheatCooldown = 150; 
+
+      renderUI();
+    }
+
+    // --- SUPPLY DROP WHEEL FUNCTIONS ---
+    function startSupplyWheel() {
+      supplyDropAvailable = false;
+      wheelRounds = 0;
+      document.getElementById("supply-status").innerText = "📦 Opening Supply Drop...";
+      document.getElementById("wheel-area").style.display = "block";
+      nextWheelRound();
+    }
+
+    function nextWheelRound() {
+      wheelRounds++;
+      if (wheelRounds > 3) {
+        claimSupplyDropLoot();
+        return;
+      }
+
+      document.getElementById("wheel-round").innerText = wheelRounds;
+      let size = 0.5 + Math.random() * 0.3;
+      redZoneStart = Math.random() * (Math.PI * 2 - size);
+      redZoneEnd = redZoneStart + size;
+
+      wheelSpeed = 0.06 + (wheelRounds * 0.02);
+      animateWheel();
+    }
+
+    function animateWheel() {
+      const canvas = document.getElementById("wheelCanvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let cx = 75, cy = 75, r = 65;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = "#333";
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#555";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, redZoneStart, redZoneEnd);
+      ctx.fillStyle = "#e74c3c";
+      ctx.fill();
+
+      wheelAngle = (wheelAngle + wheelSpeed) % (Math.PI * 2);
+      let px = cx + Math.cos(wheelAngle) * (r - 10);
+      let py = cy + Math.sin(wheelAngle) * (r - 10);
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(px, py);
+      ctx.strokeStyle = "#00ffff";
+      ctx.lineWidth = 5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+
+      wheelAnimId = requestAnimationFrame(animateWheel);
+    }
+
+    function clickWheel() {
+      cancelAnimationFrame(wheelAnimId);
+
+      if (wheelAngle >= redZoneStart && wheelAngle <= redZoneEnd) {
+        nextWheelRound();
+      } else {
+        alert("❌ Missed the Red Zone! The Supply Drop disappeared!");
+        resetSupplyDrop();
+      }
+    }
+
+    function claimSupplyDropLoot() {
+      cancelAnimationFrame(wheelAnimId);
+      document.getElementById("wheel-area").style.display = "none";
+
+      let rand = Math.random();
+      let lootCash = 100;
+      if (rand < 0.50) lootCash = Math.floor(Math.random() * 400) + 100;
+      else if (rand < 0.80) lootCash = Math.floor(Math.random() * 1500) + 500;
+      else if (rand < 0.95) lootCash = Math.floor(Math.random() * 3000) + 2000;
+      else lootCash = Math.floor(Math.random() * 5000) + 5000;
+
+      cash += lootCash;
+      alert(`🎉 SUCCESS! You opened the Supply Drop and got $${lootCash}!`);
+      resetSupplyDrop();
+    }
+
+    function resetSupplyDrop() {
+      cancelAnimationFrame(wheelAnimId);
+      document.getElementById("wheel-area").style.display = "none";
+      supplyDropTimer = 60;
+      supplyDropAvailable = false;
+    }
+
+    function getRandomLoot() {
+      if (Math.random() < 0.01) {
+        let chosenMed = medallionDefs[Math.floor(Math.random() * medallionDefs.length)];
+        return {
+          isMedallion: true,
+          id: chosenMed.id,
+          name: chosenMed.name,
+          cost: 200,
+          icon: chosenMed.icon,
+          desc: chosenMed.desc,
+          tier: "Medallion"
+        };
+      }
+
+      let rand = Math.random() * 100;
+      let cumulative = 0;
+      let chosenRarity = rarities[0];
+
+      let effectiveLuck = luckBoost + surgeLuckTemp + (devLuckTimer > 0 ? 70 : 0);
+
+      for (let r of rarities) {
+        let boostedChance = r.chance;
+        if (r.tier !== "Common") boostedChance += (effectiveLuck * 0.1);
+        
+        cumulative += boostedChance;
+        if (rand <= cumulative) {
+          chosenRarity = r;
+          break;
+        }
+      }
+
+      if (chosenRarity.isExotic) {
+        return {
+          name: "Eradicator O.X.R. Rifle",
+          tier: "Exotic",
+          income: chosenRarity.income,
+          cost: chosenRarity.cost,
+          ability: true
+        };
+      }
+
+      let chosenWeapon = weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
+      let finalCost = Math.round(chosenRarity.cost * chosenWeapon.costMult);
+      let finalIncome = Math.round(chosenRarity.income * chosenWeapon.incomeMult);
+
+      return {
+        name: chosenWeapon.name,
+        tier: chosenRarity.tier,
+        income: Math.max(1, finalIncome),
+        cost: finalCost
+      };
+    }
+
+    function spawnNewPlatformItems() {
+      platformItems = [getRandomLoot(), getRandomLoot(), getRandomLoot()];
+      itemsCollectedThisDrop = 0;
+      isNewDrop = true;
+      surgeLuckTemp = 0;
+    }
+
+    function startShootingRange() {
+      if (rangeCooldown > 0) {
+        alert(`Please wait! Cooldown active: ${rangeCooldown} seconds left.`);
+        return;
+      }
+      if (cash < 1000) {
+        alert("You need at least $1,000 to play!");
+        return;
+      }
+      if (inventory.length === 0) {
+        alert("You need at least one weapon in your loadout!");
+        return;
+      }
+
+      cash -= 1000;
+      gamesPlayed++;
+      currentJackpot = Math.round(1500 * (1 + gamesPlayed * 0.25));
+
+      rangeActive = true;
+      targetIndex = 0;
+      hits = 0;
+
+      selectedWeaponIndex = document.getElementById("weapon-select").value;
+      
+      document.getElementById("start-range-btn").disabled = true;
+      document.getElementById("jackpot-amount").innerText = `$${currentJackpot}`;
+      document.getElementById("hits-count").innerText = "0";
+
+      nextTarget();
+    }
+
+    function nextTarget() {
+      clearTimeout(targetTimer);
+      const area = document.getElementById("target-area");
+      area.innerHTML = "";
+
+      if (targetIndex >= 10) {
+        finishRange();
+        return;
+      }
+
+      targetIndex++;
+      document.getElementById("target-count").innerText = targetIndex;
+
+      const maxX = area.clientWidth - 55;
+      const maxY = area.clientHeight - 55;
+
+      let usedWeaponName = inventory[selectedWeaponIndex].name;
+      let weaponData = weaponTypes.find(w => w.name === usedWeaponName) || weaponTypes[0];
+
+      let spreadX = (Math.random() - 0.5) * weaponData.spread;
+      let spreadY = (Math.random() - 0.5) * weaponData.spread;
+
+      let realX = Math.min(maxX, Math.max(5, Math.floor(Math.random() * maxX) + spreadX));
+      let realY = Math.min(maxY, Math.max(5, Math.floor(Math.random() * maxY) + spreadY));
+
+      let realTarget = document.createElement("div");
+      realTarget.className = "target";
+      realTarget.style.left = realX + "px";
+      realTarget.style.top = realY + "px";
+      realTarget.onclick = function(e) {
+        e.stopPropagation();
+        hitTarget();
+      };
+      area.appendChild(realTarget);
+
+      let numFakes = hits;
+      for (let i = 0; i < numFakes; i++) {
+        let fakeTarget = document.createElement("div");
+        fakeTarget.className = "target-fake";
+        let fakeX = Math.floor(Math.random() * maxX);
+        let fakeY = Math.floor(Math.random() * maxY);
+        fakeTarget.style.left = fakeX + "px";
+        fakeTarget.style.top = fakeY + "px";
+        fakeTarget.onclick = function(e) {
+          e.stopPropagation();
+          failRange("❌ You clicked a REDDISH-ORANGE FAKE target! Instant Loss!");
+        };
+        area.appendChild(fakeTarget);
+      }
+
+      targetTimer = setTimeout(() => {
+        area.innerHTML = "";
+        nextTarget();
+      }, 2000);
+    }
+
+    function hitTarget() {
+      if (!rangeActive) return;
+      hits++;
+      document.getElementById("hits-count").innerText = hits;
+      nextTarget();
+    }
+
+    function areaClicked(event) {
+      if (!rangeActive) return;
+      if (event.target.id === "target-area") {
+        failRange("❌ You missed and clicked the empty background! Instant Loss!");
+      }
+    }
+
+    function failRange(reasonMessage) {
+      clearTimeout(targetTimer);
+      rangeActive = false;
+      document.getElementById("target-area").innerHTML = "";
+      alert(reasonMessage);
+      finishRange(true);
+    }
+
+    function finishRange(failed = false) {
+      clearTimeout(targetTimer);
+      rangeActive = false;
+      document.getElementById("target-area").innerHTML = "";
+
+      rangeCooldown = 120;
+
+      let usedWeapon = inventory[selectedWeaponIndex];
+      let requiredHits = medallions.some(m => m.id === "carapace") ? 7 : 8;
+
+      if (!failed && hits >= requiredHits) {
+        cash += currentJackpot;
+        alert(`🎉 JACKPOT! You hit ${hits}/10 targets and won $${currentJackpot}!`);
+
+        if (["Legendary", "Mythic", "Exotic"].includes(usedWeapon.tier)) {
+          luckBoost += 10;
+          document.getElementById("luck-boost").innerText = luckBoost;
+          alert(`✨ Luck Boost Triggered! +10% Luck from using a ${usedWeapon.tier} weapon!`);
+        }
+      } else if (!failed) {
+        alert(`❌ Game Over! You only scored ${hits}/10 hits (Needed ${requiredHits}). Try again!`);
+      }
+
+      let breakChance = 30;
+      if (usedWeapon.tier === "Exotic") breakChance = 21;
+      if (usedWeapon.tier === "Mythic") breakChance = 9;
+
+      if (Math.random() * 100 < breakChance) {
+        alert(`💥 OH NO! Your ${usedWeapon.name} (${usedWeapon.tier}) broke!`);
+        inventory.splice(selectedWeaponIndex, 1);
+      }
+
+      renderUI();
+    }
+
+    spawnNewPlatformItems();
+
+    // MAIN GAME LOOP
+    setInterval(() => {
+      let baseIncome = inventory.reduce((sum, item) => sum + item.income, 0);
+
+      if (devCheatCooldown > 0) devCheatCooldown--;
+      if (devLuckTimer > 0) devLuckTimer--;
+
+      if (medallions.some(m => m.id === "springleg") && doubleCashTimer <= 0) {
+        if (Math.random() < 0.15) {
+          doubleCashTimer = 30;
+          alert("⚡ Springleg Medallion triggered 2X Cash for 30 Seconds!");
+        }
+      }
+
+      if (doubleCashTimer > 0) {
+        doubleCashTimer--;
+        baseIncome *= 2;
+        document.getElementById("2x-indicator").style.display = "inline";
+      } else {
+        document.getElementById("2x-indicator").style.display = "none";
+      }
+
+      cash += baseIncome;
+
+      if (!supplyDropAvailable && document.getElementById("wheel-area").style.display === "none") {
+        supplyDropTimer--;
+        if (supplyDropTimer <= 0) {
+          supplyDropAvailable = true;
+        }
+      }
+
+      spawnTimer--;
+      if (spawnTimer <= 0) {
+        spawnTimer = 12;
+        spawnNewPlatformItems();
+      }
+
+      const rangeBtn = document.getElementById("start-range-btn");
+      if (rangeCooldown > 0) {
+        rangeCooldown--;
+        if (!rangeActive) {
+          rangeBtn.disabled = true;
+          rangeBtn.innerText = `Cooldown (${rangeCooldown}s)`;
+        }
+      } else if (!rangeActive) {
+        rangeBtn.disabled = false;
+        rangeBtn.innerText = "Play Challenge ($1,000)";
+      }
+
+      exoticTimer--;
+      if (exoticTimer <= 0) {
+        exoticTimer = 30;
+        inventory.forEach(item => {
+          if (item.ability) {
+            let bonus = Math.floor(Math.random() * 4001) + 1000;
+            cash += bonus;
+            alert(`⚡ Exotic Ability Triggered! Eradicator O.X.R. Rifle gave you +$${bonus}!`);
+          }
+        });
+      }
+
+      document.getElementById("cash").innerText = cash;
+      document.getElementById("income").innerText = baseIncome;
+      document.getElementById("timer").innerText = spawnTimer;
+
+      renderUI();
+      isNewDrop = false;
+    }, 1000);
+
+    function collectPlatformItem(index) {
+      let item = platformItems[index];
+      if (!item || itemsCollectedThisDrop >= 2) return;
+
+      if (cash < item.cost) {
+        alert("Not enough cash to buy this item!");
+        return;
+      }
+
+      if (item.isMedallion) {
+        if (medallions.length >= 3) {
+          alert("Your Medallion Pouch is full (Max 3)!");
+          return;
+        }
+        cash -= item.cost;
+        medallions.push(item);
+        platformItems[index] = null;
+        itemsCollectedThisDrop++;
+      } else {
+        if (inventory.length >= 8) {
+          alert("Your Inventory is full (Max 8)!");
+          return;
+        }
+        cash -= item.cost;
+        inventory.push(item);
+        platformItems[index] = null;
+        itemsCollectedThisDrop++;
+      }
+
+      if (medallions.some(m => m.id === "surge")) {
+        surgeLuckTemp += 2;
+      }
+
+      renderUI();
+    }
+
+    function sellItem(index) {
+      let halfPrice = Math.round(inventory[index].cost / 2);
+      cash += halfPrice;
+      inventory.splice(index, 1);
+      renderUI();
+    }
+
+    function sellMedallion(index) {
+      cash += 100;
+      medallions.splice(index, 1);
+      renderUI();
+    }
+
+    function renderUI() {
+      const supplyStatus = document.getElementById("supply-status");
+      if (document.getElementById("wheel-area").style.display === "none") {
+        if (supplyDropAvailable) {
+          supplyStatus.innerHTML = `<button style="background:#f39c12; font-size:1rem;" onclick="startSupplyWheel()">🪂 Open Supply Drop!</button>`;
+        } else {
+          supplyStatus.innerHTML = `Next Supply Drop arriving in: <b>${supplyDropTimer}</b>s`;
+        }
+      }
+
+      if (devLuckTimer > 0) {
+        document.getElementById("cheat-luck-indicator").style.display = "inline";
+      } else {
+        document.getElementById("cheat-luck-indicator").style.display = "none";
+      }
+
+      const medDiv = document.getElementById("medallion-grid");
+      medDiv.innerHTML = "";
+      document.getElementById("med-count").innerText = medallions.length;
+
+      for (let i = 0; i < 3; i++) {
+        if (i < medallions.length) {
+          let med = medallions[i];
+          medDiv.innerHTML += `
+            <div class="medallion-slot">
+              <img src="${med.icon}" class="medallion-img" alt="${med.name}">
+              <b>${med.name}</b>
+              <small style="font-size:0.65rem; color:#ccc; margin: 3px 0;">${med.desc}</small>
+              <button class="sell-btn" onclick="sellMedallion(${i})">Sell ($100)</button>
+            </div>`;
+        } else {
+          medDiv.innerHTML += `<div class="medallion-slot" style="opacity: 0.3;"><i>Empty Slot</i></div>`;
+        }
+      }
+
+      let requiredHits = medallions.some(m => m.id === "carapace") ? 7 : 8;
+      document.getElementById("target-goal-text").innerText = requiredHits;
+      document.getElementById("luck-boost").innerText = luckBoost + surgeLuckTemp + (devLuckTimer > 0 ? 70 : 0);
+
+      const platformDiv = document.getElementById("platform-grid");
+      platformDiv.innerHTML = "";
+
+      for (let i = 0; i < 3; i++) {
+        let item = platformItems[i];
+        if (item) {
+          let animClass = isNewDrop ? "drop-anim" : "";
+          let disableBtn = itemsCollectedThisDrop >= 2 ? "disabled" : "";
+          let btnText = itemsCollectedThisDrop >= 2 ? "Limit Reached" : `Buy ($${item.cost})`;
+
+          if (item.isMedallion) {
+            platformDiv.innerHTML += `
+              <div class="slot MedallionBorder ${animClass}">
+                <img src="${item.icon}" style="width:35px; height:35px;" alt="Medallion">
+                <b>${item.name}</b>
+                <span class="rarity-label" style="color:#f39c12;">(Medallion)</span>
+                <small style="font-size:0.6rem;">${item.desc}</small>
+                <button onclick="collectPlatformItem(${i})" ${disableBtn}>${btnText}</button>
+              </div>`;
+          } else {
+            let abilityTag = item.ability ? `<span class="ability-text">+$1k-$5k / 30s</span>` : '';
+            platformDiv.innerHTML += `
+              <div class="slot ${item.tier} ${animClass}">
+                <b>${item.name}</b>
+                <span class="rarity-label text-${item.tier}">(${item.tier})</span>
+                ${abilityTag}
+                <small>+$${item.income}/s</small>
+                <button onclick="collectPlatformItem(${i})" ${disableBtn}>${btnText}</button>
+              </div>`;
+          }
+        } else {
+          platformDiv.innerHTML += `<div class="slot" style="opacity: 0.3;"><i>Claimed</i></div>`;
+        }
+      }
+
+      const grid = document.getElementById("inventory-grid");
+      grid.innerHTML = "";
+      document.getElementById("count").innerText = inventory.length;
+
+      const weaponSelect = document.getElementById("weapon-select");
+      weaponSelect.innerHTML = "";
+
+      for (let i = 0; i < 8; i++) {
+        if (i < inventory.length) {
+          let item = inventory[i];
+          let abilityTag = item.ability ? `<span class="ability-text">+$1k-$5k / 30s</span>` : '';
+          let sellPrice = Math.round(item.cost / 2);
+
+          grid.innerHTML += `
+            <div class="slot ${item.tier}">
+              <b>${item.name}</b>
+              <span class="rarity-label text-${item.tier}">(${item.tier})</span>
+              ${abilityTag}
+              <small>+$${item.income}/s</small>
+              <button class="sell-btn" onclick="sellItem(${i})">Sell ($${sellPrice})</button>
+            </div>`;
+
+          weaponSelect.innerHTML += `<option value="${i}">${item.name} (${item.tier})</option>`;
+        } else {
+          grid.innerHTML += `<div class="slot" style="opacity: 0.3;"><i>Empty</i></div>`;
+        }
+      }
+    }
+
+    renderUI();
+  </script>
+</body>
+</html>
